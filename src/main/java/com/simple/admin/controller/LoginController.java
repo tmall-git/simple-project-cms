@@ -43,7 +43,7 @@ public class LoginController {
 		return "login";
 	}
 	
-	@RequestMapping(value = "doLogin",method=RequestMethod.GET)
+	@RequestMapping(value = "doLogin",method=RequestMethod.POST)
 	public String doLogin(String userName,String password,HttpServletRequest request, HttpServletResponse response){
 		try {
 			if (!ACCOUNT.equals(userName)) {
