@@ -23,8 +23,7 @@ public class LenovoInterceptor implements HandlerInterceptor{
 
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
 			Object handler) throws Exception {
-		String contentType = request.getHeader("Content-Type");
-		System.out.println(">>>>>>contentype:"+contentType);
+		
 //		HandlerMethod handlerMethod = (HandlerMethod) handler; 
 //		boolean notCareLogin = handlerMethod.getMethod().isAnnotationPresent(NotCareLogin.class);
 //		if (notCareLogin) {

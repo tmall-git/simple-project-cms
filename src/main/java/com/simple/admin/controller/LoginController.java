@@ -3,82 +3,73 @@ package com.simple.admin.controller;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.simple.admin.util.AjaxWebUtil;
 import com.simple.admin.util.LoginUserUtil;
-import com.simple.model.ResponseInfo;
-import com.simple.model.ResponseStatus;
-import com.simple.model.SysUser;
-import com.simple.service.SysUserService;
-/**
- * 
- * @author zhenglong.wei
- *
- */
-@Controller
-@RequestMapping(value = "/login")
-public class LoginController {
-	
-	private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+import com.simple.common.config.EnvPropertiesConfiger;
+import com.simple.common.util.AjaxWebUtil;
+import com.simple.constant.Constant;
+import com.simple.model.User;
+import com.simple.service.UserService;
+import com.simple.weixin.auth.OAuthAccessToken;
+import com.simple.weixin.auth.OAuthUserInfo;
+import com.simple.weixin.auth.WeiXinAuth;
 
-	@Autowired
-	SysUserService sysUserService;
+@Controller
+@RequestMapping("")
+public class LoginController {
+
+	private static final String ACCOUNT = EnvPropertiesConfiger.getValue("account");
+	private static final String PASSWORD = EnvPropertiesConfiger.getValue("password");
 	
+	@Autowired
+	private UserService userService;
+	
+	
+	/**
+	 * 跳转到微信授权，然后回跳到微信支付页面
+	 * @param code
+	 * @param token
+	 * @param request
+	 * @param response
+	 * @return
+	 */
 	@RequestMapping(value = "login",method=RequestMethod.GET)
-	public ModelAndView login(HttpServletRequest request, HttpServletResponse response) {
-		return new ModelAndView("login");
+	public String login(HttpServletRequest request, HttpServletResponse response) {
+		return "login";
 	}
 	
-	
-	@RequestMapping(value = "doLogin",method=RequestMethod.POST)
-	public ModelAndView doLogin(HttpServletRequest request, HttpServletResponse response) {
-		String leaseholderId = request.getParameter("leaseholderId");
-		String studentId = request.getParameter("studentId");
-		SysUser user = sysUserService.querySysUser(leaseholderId,studentId);
-		if(null == user ){
-			if (!AjaxWebUtil.isAjaxRequest(request)) {// 不是ajax请求
-				return new ModelAndView("redirect:/login/login");
-			} else {
-				AjaxWebUtil.sendAjaxResponse(request,response,new ResponseInfo(new ResponseStatus(false, "000001", "not exist user in the system"), "error"));
+	@RequestMapping(value = "doLogin",method=RequestMethod.GET)
+	public String doLogin(String userName,String password,HttpServletRequest request, HttpServletResponse response){
+		try {
+			if (!ACCOUNT.equals(userName)) {
+				AjaxWebUtil.sendAjaxResponse(request, response, "管理员帐号不存在.");
 				return null;
 			}
-		}
-		
-//		if(!user.getPassword().equals(password)){
-//			if (!AjaxWebUtil.isAjaxRequest(request)) {// 不是ajax请求
-//				return new ModelAndView("redirect:/login/login");
-//			} else {
-//				AjaxWebUtil.sendAjaxResponse(request,response,new ResponseInfo(new ResponseStatus(false, "000001", "username or password is incorrect"), "error"));
-//				return null;
-//			}
-//		}
-		LoginUserUtil.setCurrentUser(request, user);
-		if (!AjaxWebUtil.isAjaxRequest(request)) {// 不是ajax请求
-			return new ModelAndView("redirect:/home/homepage");
-		} else {
-			AjaxWebUtil.sendAjaxResponse(request,response,new ResponseInfo(new ResponseStatus(true, "000000", "登录成功！"), "ok"));
+			
+			if (!PASSWORD.equals(password)) {
+				AjaxWebUtil.sendAjaxResponse(request, response, "密码错误.");
+				return null;
+			}
+			
+			User user = new User();
+			user.setUserName("管理员");
+			LoginUserUtil.setCurrentUser(request, user);
+			return "main";
+		}catch(Exception e) {
+			AjaxWebUtil.sendAjaxResponse(request, response, "登录失败:"+e.getLocalizedMessage());
 			return null;
 		}
-		
 	}
 	
-	@RequestMapping(value = "logout",method=RequestMethod.POST)
-	public ModelAndView logout(HttpServletRequest request, HttpServletResponse response) {
+	@RequestMapping(value = "logout",method=RequestMethod.GET)
+	@ResponseBody
+	public String logout(HttpServletRequest request, HttpServletResponse response){
 		LoginUserUtil.removeCurrentUser(request);
-		if (!AjaxWebUtil.isAjaxRequest(request)) {// 不是ajax请求
-			return new ModelAndView("redirect:/login/login");
-		} else {
-			AjaxWebUtil.sendAjaxResponse(request,response,new ResponseInfo(new ResponseStatus(true, "000000", "登出！"), "ok"));
-			return null;
-		}
+		return AjaxWebUtil.sendAjaxResponse(request, response, true,"登出成功", null);
 	}
-	
-	
 }

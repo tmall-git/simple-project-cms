@@ -17,13 +17,13 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.simple.admin.util.AjaxWebUtil;
 import com.simple.admin.util.LoginUserUtil;
 import com.simple.admin.util.PatternUtils;
 import com.simple.common.config.EnvPropertiesConfiger;
+import com.simple.common.util.AjaxWebUtil;
 import com.simple.model.ResponseInfo;
 import com.simple.model.ResponseStatus;
-import com.simple.model.SysUser;
+import com.simple.model.User;
 
 public class PermissionFilter
   implements Filter
@@ -50,10 +50,10 @@ public class PermissionFilter
     }
     else {
       //判断用户是否已经登录，已经登录的跳转，没有登录跳转到登录页面
-      SysUser user = LoginUserUtil.getCurrentUser(request);
+      User user = LoginUserUtil.getCurrentUser(request);
       if ( null == user ) {
-    	  //TODO 后面要放开 redirectLogin(request, response);
-    	  chain.doFilter(servletRequest, servletResponse); //TODO 后面要去掉
+    	  redirectLogin(request,response);
+    	  //chain.doFilter(servletRequest, servletResponse); 
       }else {
     	  chain.doFilter(servletRequest, servletResponse); 
       }
@@ -99,15 +99,20 @@ public class PermissionFilter
   }
 
   private void redirectLogin(HttpServletRequest request, HttpServletResponse response) {
+//	  try {
+//		response.sendRedirect(EnvPropertiesConfiger.getValue("redirectpage"));
+//	} catch (IOException e) {
+//		e.printStackTrace();
+//	}
 	if (!AjaxWebUtil.isAjaxRequest(request)) {
 		try {
-			response.sendRedirect("/login/login");
+			//response.sendRedirect(EnvPropertiesConfiger.getValue("redirectpage"));
+			response.sendRedirect("login");
 		} catch (IOException e) {
 			this.logger.error(e.getMessage(), e);
 		}
 	} else {
-		AjaxWebUtil.sendAjaxResponse(request, response,
-				new ResponseInfo(new ResponseStatus(true, "000000", "验证成功！"), "ok"));
+		AjaxWebUtil.sendAjaxResponse(request, response,new ResponseInfo(new ResponseStatus(false,ResponseStatus.REDIRECT,"请重新登录"), null));
 	}
   }
 }
