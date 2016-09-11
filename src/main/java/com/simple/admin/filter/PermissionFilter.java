@@ -106,8 +106,8 @@ public class PermissionFilter
 //	}
 	if (!AjaxWebUtil.isAjaxRequest(request)) {
 		try {
-			//response.sendRedirect(EnvPropertiesConfiger.getValue("redirectpage"));
-			response.sendRedirect("login");
+			response.sendRedirect(EnvPropertiesConfiger.getValue("redirectpage"));
+			//response.sendRedirect("/login");
 		} catch (IOException e) {
 			this.logger.error(e.getMessage(), e);
 		}

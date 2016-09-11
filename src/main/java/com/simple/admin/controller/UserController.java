@@ -26,9 +26,9 @@ public class UserController {
 	
 	@RequestMapping(value="list",method=RequestMethod.GET)
 	@ResponseBody
-	public String list(String phone,int pageIndex,int pageSize,HttpServletRequest request, HttpServletResponse response){
+	public String list(String phone,int userStatus,int pageIndex,int pageSize,HttpServletRequest request, HttpServletResponse response){
 		try {
-			PageResult pr = userService.queryPage(phone, pageIndex, pageSize);
+			PageResult pr = userService.queryPage(phone,userStatus, pageIndex, pageSize);
 			return  AjaxWebUtil.sendAjaxResponse(request, response, true,"查询成功", pr);
 		}
 		catch (Exception e){

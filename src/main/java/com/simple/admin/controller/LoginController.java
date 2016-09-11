@@ -44,25 +44,23 @@ public class LoginController {
 	}
 	
 	@RequestMapping(value = "doLogin",method=RequestMethod.POST)
+	@ResponseBody
 	public String doLogin(String userName,String password,HttpServletRequest request, HttpServletResponse response){
 		try {
 			if (!ACCOUNT.equals(userName)) {
-				AjaxWebUtil.sendAjaxResponse(request, response, "管理员帐号不存在.");
-				return null;
+				return AjaxWebUtil.sendAjaxResponse(request, response, false,"管理员帐号不存在.",null);
 			}
 			
 			if (!PASSWORD.equals(password)) {
-				AjaxWebUtil.sendAjaxResponse(request, response, "密码错误.");
-				return null;
+				return AjaxWebUtil.sendAjaxResponse(request, response, false,"密码错误.",null);
 			}
 			
 			User user = new User();
 			user.setUserName("管理员");
 			LoginUserUtil.setCurrentUser(request, user);
-			return "main";
+			return AjaxWebUtil.sendAjaxResponse(request, response, true,"登录成功",null);
 		}catch(Exception e) {
-			AjaxWebUtil.sendAjaxResponse(request, response, "登录失败:"+e.getLocalizedMessage());
-			return null;
+			return AjaxWebUtil.sendAjaxResponse(request, response, false,"登录失败:"+e.getLocalizedMessage(),null);
 		}
 	}
 	
